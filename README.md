@@ -1,0 +1,2 @@
+# VRChat_Udon_Data
+VRChatのUdonギミックで扱うデータの管理
