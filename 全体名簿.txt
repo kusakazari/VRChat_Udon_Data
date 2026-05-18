@@ -107,7 +107,3 @@ cabosP,かぼす
 levian,れび,levi
 
 草飾－kusa_kazari,かざりちゃん
-
-ひいらぎ,ひいらぎ
-
-aiueo,aiueo
