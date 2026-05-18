@@ -44,12 +44,12 @@ nagomi0126,れんずちゃん,たぬどら
 むきゅきゅ,むきゅきゅ
 ツクモシオ,シオ
 いっずん。,いっずん
-NekokichiMz
-ばいおりずむ
+NekokichiMz,NekokichiMz
+ばいおりずむ,ばいおりずむ
 々茶_chaCHA,ちゃちゃ
 cabosP,かぼす
 ひいらぎ　ちゅう,ちゅう
 こいちご,こいちご
 稲狐夜憑宵,稲狐夜憑宵
-levian,れび
+levian,れび,levi
 草飾－kusa_kazari,かざりちゃん
