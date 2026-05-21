@@ -58,7 +58,7 @@ Sai616170,Sai,saiさん
 
 ライ_rye,ライくん、ライちゃん
 
-Nihonium_LTE,にほさん・にほにうむさん
+Nihonium_LTE,にほさん・にほにうむさん,にほにうむ
 
 いつキ［Ituki］,いつキ,いつキちゃん
 
@@ -98,12 +98,12 @@ NekokichiMz,NekokichiMz
 
 cabosP,かぼす
 
-ひいらぎ　ちゅう,ちゅう
+ひいらぎ　ちゅう,ちゅう,ちゅうちゃん
 
 こいちご,こいちご
 
-稲狐夜憑宵,稲狐夜憑宵
+稲狐夜憑宵,稲狐夜憑宵,つきよちゃん
 
-levian,れび,levi
+levian,れび,levi,レイビー
 
 草飾－kusa_kazari,かざりちゃん
