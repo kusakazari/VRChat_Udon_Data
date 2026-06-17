@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VRCふれあい動物園 キャスト紹介画像生成ツール</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Mochiy Pop One & Quicksand -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Quicksand:wght@500;700&family=Yomogi&display=swap" rel="stylesheet">
+  
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- JSZip -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    body {
+      font-family: 'Quicksand', 'Yomogi', 'Helvetica Neue', Arial, sans-serif;
+      background-color: #f7f3eb;
+      background-image: radial-gradient(#e5ddd0 1px, transparent 1px);
+      background-size: 20px 20px;
+    }
+    .font-mochiy {
+      font-family: 'Mochiy Pop One', sans-serif;
+    }
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1ebd9;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c3b59f;
+      border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a89a83;
+    }
+  </style>
+</head>
+<body class="text-stone-800 min-h-screen flex flex-col lg:h-screen lg:overflow-hidden">
+
+  <div id="root" class="flex-grow flex flex-col lg:h-full">
+    <!-- ヘッダーエリア -->
+    <header class="bg-gradient-to-r from-amber-800 to-amber-700 text-amber-50 shadow-md border-b-4 border-amber-900 py-3 px-6 shrink-0">
+      <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl text-amber-300"><i class="fa-solid fa-paw"></i></span>
+          <div>
+            <h1 class="text-xl font-bold font-mochiy tracking-wider">VRCふれあい動物園</h1>
+            <p class="text-[10px] text-amber-200">イメージパッド用キャスト紹介画像生成ツール (スタッフ専用)</p>
+          </div>
+        </div>
+        <div class="bg-amber-900/40 px-3 py-1.5 rounded-lg border border-amber-600 flex items-center gap-3">
+          <span class="text-xs text-amber-200">イベント月日(4桁):</span>
+          <input 
+            type="text" 
+            id="event-date"
+            value="1025" 
+            class="bg-amber-950 text-white font-bold w-20 px-2 py-0.5 rounded text-center border border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"
+            placeholder="0619"
+            maxLength="4"
+          />
+        </div>
+      </div>
+    </header>
+
+    <!-- メインレイアウト (左右分割) -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6 lg:overflow-hidden">
+      
+      <!-- 左カラム（コントロールパネルエリア：固定） -->
+      <section class="lg:col-span-5 flex flex-col gap-6 lg:overflow-y-auto lg:pr-2">
+        
+        <!-- CSVファイル読み込みパネル -->
+        <div class="bg-white rounded-2xl shadow-sm border border-stone-200 p-5 shrink-0">
+          <h2 class="text-base font-bold font-mochiy text-amber-900 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-file-csv"></i> CSVファイルを読み込む
+          </h2>
+          <p class="text-xs text-stone-600 mb-4 leading-relaxed">
+            スプレッドシートの「次回出演者」からエクスポートした名簿CSVファイルを指定してください。自動的に「担当エリア」や「キャラシートURL」項目を解析し、3エリア（もふ、猛獣、みずべ）のケモノ＆飼育員キャストを仕分けして画像を組み合わせ、プレビューを作成します。
+          </p>
+          
+          <div class="flex flex-col gap-3">
+            <label class="w-full flex items-center justify-center border-2 border-dashed border-stone-300 hover:border-amber-500 bg-stone-50 hover:bg-amber-50/20 text-stone-600 rounded-xl px-4 py-3 cursor-pointer transition duration-200">
+              <i class="fa-solid fa-cloud-arrow-up mr-2 text-amber-700"></i>
+              <span id="file-label-text" class="text-xs truncate font-bold">CSVファイルを選択してください</span>
+              <input 
+                type="file" 
+                id="csv-file-input"
+                accept=".csv" 
+                class="hidden" 
+              />
+            </label>
+            
+            <button 
+              id="load-csv-btn"
+              disabled
+              class="w-full py-2.5 rounded-xl font-bold font-mochiy text-xs shadow-sm transition duration-200 flex items-center justify-center gap-2 bg-stone-200 text-stone-400 cursor-not-allowed"
+            >
+              <i class="fa-solid fa-wand-magic-sparkles"></i> 画像を組み合わせて表示
+            </button>
+          </div>
+        </div>
+
+        <!-- ダウンロード選択パネル -->
+        <div id="download-panel" class="bg-white rounded-2xl shadow-sm border border-stone-200 p-5 shrink-0 opacity-60 pointer-events-none transition-opacity duration-200">
+          <h3 class="font-bold text-sm font-mochiy text-stone-800 mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-file-archive"></i> 出力画像のZIPダウンロード選択
+          </h3>
+          <p class="text-[11px] text-stone-500 mb-4">チェックを入れた画像を1つのZIPファイルにまとめて圧縮ダウンロードします。必要に応じて切り替えてください。</p>
+          
+          <div class="flex flex-col gap-2.5 mb-4 border-b border-stone-100 pb-3">
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <input type="checkbox" id="check-mofu" checked class="w-4.5 h-4.5 accent-emerald-500 rounded" />
+              <span class="text-xs font-bold text-emerald-700">もふもふパーク</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <input type="checkbox" id="check-moujuu" checked class="w-4.5 h-4.5 accent-orange-500 rounded" />
+              <span class="text-xs font-bold text-orange-700">猛獣館</span>
+            </label>
+            <label class="flex items-center gap-3 cursor-pointer select-none">
+              <input type="checkbox" id="check-mizube" checked class="w-4.5 h-4.5 accent-sky-500 rounded" />
+              <span class="text-xs font-bold text-sky-700">みずべのなかま</span>
+            </label>
+          </div>
+
+          <button 
+            id="download-all-btn"
+            class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold font-mochiy py-2.5 rounded-xl shadow transition duration-200 flex items-center justify-center gap-2 text-xs"
+          >
+            <i class="fa-solid fa-file-zipper"></i> ZIPファイルで一括ダウンロード
+          </button>
+        </div>
+      </section>
+
+      <!-- 右カラム（プレビュー＆調整エリア：スクロール可能） -->
+      <section class="lg:col-span-7 flex flex-col lg:overflow-y-auto lg:pr-2 h-full">
+        
+        <!-- 未ロード時のプレースホルダー -->
+        <div id="empty-state" class="bg-white rounded-2xl border border-stone-200 py-16 px-4 text-center my-auto max-w-xl mx-auto w-full">
+          <span class="text-4xl text-stone-300 block mb-3"><i class="fa-solid fa-images"></i></span>
+          <h3 class="font-bold text-xl font-mochiy text-stone-700 mb-2">CSVデータが読み込まれていません</h3>
+          <p class="text-xs text-stone-500 leading-relaxed max-w-md mx-auto">
+            左側のパネルからキャスト一覧CSVファイルをロードすると、画像を組み合わせて自動構築された結果がここに表示されます。
+          </p>
+        </div>
+
+        <!-- ロード後の表示エリア -->
+        <div id="results-area" class="hidden space-y-8 pb-10">
+          
+          <!-- もふもふパーク -->
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+            <div class="bg-emerald-600 text-white px-5 py-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2 font-mochiy text-sm">
+                <i class="fa-solid fa-paw"></i> もふもふパーク プレビュー
+              </div>
+              <span id="filename-mofu" class="text-[10px] bg-emerald-800/50 px-3 py-1 rounded-full text-emerald-100">
+                mofu_imagepad_1025.png
+              </span>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+              <div class="border border-stone-300 rounded-xl overflow-hidden bg-stone-100 shadow-inner aspect-[4/3] w-full relative">
+                <img id="preview-img-mofu" src="" alt="Mofu Preview" class="w-full h-full object-contain hidden" />
+                <div id="loader-mofu" class="absolute inset-0 flex items-center justify-center text-xs text-stone-400">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> 画像組み合わせ中...
+                </div>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs text-stone-700 font-mochiy border-b pb-1.5 mb-2 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-up-down"></i> 画像変更と並び替え (ドラッグで順番を変更できます)
+                </h4>
+                <div id="list-mofu" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 猛獣館 -->
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+            <div class="bg-orange-600 text-white px-5 py-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2 font-mochiy text-sm">
+                <i class="fa-solid fa-shield-cat"></i> 猛獣館 プレビュー
+              </div>
+              <span id="filename-moujuu" class="text-[10px] bg-orange-800/50 px-3 py-1 rounded-full text-orange-100">
+                moujuu_imagepad_1025.png
+              </span>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+              <div class="border border-stone-300 rounded-xl overflow-hidden bg-stone-100 shadow-inner aspect-[4/3] w-full relative">
+                <img id="preview-img-moujuu" src="" alt="Moujuu Preview" class="w-full h-full object-contain hidden" />
+                <div id="loader-moujuu" class="absolute inset-0 flex items-center justify-center text-xs text-stone-400">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> 画像組み合わせ中...
+                </div>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs text-stone-700 font-mochiy border-b pb-1.5 mb-2 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-up-down"></i> 画像変更と並び替え (ドラッグで順番を変更できます)
+                </h4>
+                <div id="list-moujuu" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- みずべのなかま -->
+          <div class="bg-white rounded-2xl shadow-sm border border-stone-200 overflow-hidden">
+            <div class="bg-sky-600 text-white px-5 py-2.5 flex items-center justify-between">
+              <div class="flex items-center gap-2 font-mochiy text-lg">
+                <i class="fa-solid fa-droplet"></i> みずべのなかま プレビュー
+              </div>
+              <span id="filename-mizube" class="text-[10px] bg-sky-800/50 px-3 py-1 rounded-full text-sky-100">
+                mizube_imagepad_1025.png
+              </span>
+            </div>
+            <div class="p-5 flex flex-col gap-4">
+              <div class="border border-stone-300 rounded-xl overflow-hidden bg-stone-100 shadow-inner aspect-[4/3] w-full relative">
+                <img id="preview-img-mizube" src="" alt="Mizube Preview" class="w-full h-full object-contain hidden" />
+                <div id="loader-mizube" class="absolute inset-0 flex items-center justify-center text-xs text-stone-400">
+                  <i class="fa-solid fa-spinner fa-spin mr-2"></i> 画像組み合わせ中...
+                </div>
+              </div>
+              <div>
+                <h4 class="font-bold text-xs text-stone-700 font-mochiy border-b pb-1.5 mb-2 flex items-center gap-1.5">
+                  <i class="fa-solid fa-arrows-up-down"></i> 画像変更と並び替え (ドラッグで順番を変更できます)
+                </h4>
+                <div id="list-mizube" class="space-y-2"></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </main>
+
+    <!-- 非表示の描画用キャンバス群 -->
+    <div class="hidden">
+      <canvas id="canvas-mofu" width="1024" height="768"></canvas>
+      <canvas id="canvas-moujuu" width="1024" height="768"></canvas>
+      <canvas id="canvas-mizube" width="1024" height="768"></canvas>
+    </div>
+
+    <!-- フッター -->
+    <footer class="bg-stone-200 border-t border-stone-300 text-center py-2 text-[10px] text-stone-500 shrink-0">
+      VRCふれあい動物園 Staff Tool. Created by kusa_kazari.
+    </footer>
+  </div>
+
+  <script>
+    const PLACEHOLDER_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23f3f4f6"/><rect x="25" y="25" width="50" height="50" rx="5" fill="none" stroke="%23d1d5db" stroke-width="4"/><circle cx="40" cy="42" r="5" fill="%23d1d5db"/><path d="M30 65 L45 50 L55 60 L62 53 L70 65 Z" fill="%23d1d5db"/></svg>`;
+    const ERROR_SVG = `data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23fee2e2"/><path d="M50 20 L80 75 L20 75 Z" fill="%23ef4444"/><text x="50" y="70" font-family="sans-serif" font-size="12" font-weight="bold" text-anchor="middle" fill="white">!</text><text x="50" y="90" font-family="sans-serif" font-size="6" text-anchor="middle" fill="%23b91c1c">画像読み込みエラー</text></svg>`;
+
+    const AppState = {
+      eventDate: "1025",
+      rawCsvText: "",
+      
+      mofuCast: [],
+      mofuStaff: [],
+      mofuCustomImg: PLACEHOLDER_SVG,
+
+      moujuuCast: [],
+      moujuuStaff: [],
+      moujuuCustomImg: PLACEHOLDER_SVG,
+
+      mizubeCast: [],
+      mizubeStaff: [],
+      mizubeCustomImg: PLACEHOLDER_SVG
+    };
+
+    let dragSrcEl = null;
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //非セキュア環境でも動作する一意のランダムなID文字列を返します。
+    //なし
+    //string (一意のID文字列)
+    //例 : generateId() => "id-pkmv81u-1715421298412"
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const generateId = () => {
+      return 'id-' + Math.random().toString(36).substring(2, 9) + '-' + Date.now();
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //今日から見て直近の次の金曜日の日付（MMDDの4桁）を計算して返します。
+    //なし
+    //string (4桁の日付文字列)
+    //例 : getNextFriday() => "0619"
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const getNextFriday = () => {
+      const today = new Date();
+      const day = today.getDay();
+      const daysUntilFriday = (5 - day + 7) % 7 || 7;
+      const nextFriday = new Date(today.getTime() + daysUntilFriday * 24 * 60 * 60 * 1000);
+      const m = String(nextFriday.getMonth() + 1).padStart(2, '0');
+      const d = String(nextFriday.getDate()).padStart(2, '0');
+      return m + d;
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //CSVの生テキストデータをパースして、結合や改行に対応した2次元配列を返します。
+    //text (string): CSVテキスト
+    //string[][]: CSVの2次元配列
+    //例 : parseCSV("a,b\nc,d") => [["a", "b"], ["c", "d"]]
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const parseCSV = (text) => {
+      const lines = [];
+      let row = [""];
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const c = text[i];
+        const next = text[i + 1];
+
+        if (c === '"') {
+          if (inQuotes && next === '"') {
+            row[row.length - 1] += '"';
+            i++;
+          } else {
+            inQuotes = !inQuotes;
+          }
+        } else if (c === ',' && !inQuotes) {
+          row.push("");
+        } else if ((c === '\r' || c === '\n') && !inQuotes) {
+          if (c === '\r' && next === '\n') {
+            i++;
+          }
+          lines.push(row);
+          row = [""];
+        } else {
+          row[row.length - 1] += c;
+        }
+      }
+      if (row.length > 1 || row[0] !== "") {
+        lines.push(row);
+      }
+      return lines;
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //画像ソースを指定してImageオブジェクトを非同期ロードします。
+    //url (string): 画像パス, onStatus (function): エラー状態コールバック
+    //Promise<HTMLImageElement>: 画像エレメント
+    //例 : loadImage("https://...", callback) => Promise<HTMLImageElement>
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const loadImage = (url, onStatus) => {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.onload = () => {
+          if (onStatus) onStatus(false);
+          resolve(img);
+        };
+        img.onerror = () => {
+          if (onStatus) onStatus(true);
+          const fallbackImg = new Image();
+          fallbackImg.onload = () => resolve(fallbackImg);
+          fallbackImg.src = ERROR_SVG;
+        };
+        img.src = url || PLACEHOLDER_SVG;
+      });
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //Canvasのグラフィックスコンテキストに対して角丸長方形のパスを作成します。
+    //ctx (CanvasRenderingContext2D), x (number), y (number), width (number), height (number), radius (number)
+    //void
+    //例 : drawRoundedRect(ctx, 0, 0, 100, 100, 10) => undefined
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const drawRoundedRect = (ctx, x, y, width, height, radius) => {
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //指定エリアに対応する画像の組み合わせをCanvas上に描写し、DataURL形式で書き出して返します。
+    //canvasId (string): キャンバス要素のID, themeColor (string): 背景色, areaName (string): エリア名, casts (array): ケモキャスト配列, staffs (array): 飼育員配列, customImg (string): カスタム画像URL, updateErrorCallback (function): エラー通知コールバック
+    //Promise<string>: Base64画像文字列
+    //例 : renderAreaImage("canvas-mofu", "#10B981", "もふもふパーク", casts, staffs, customImg, cb) => Promise<string>
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const renderAreaImage = async (canvasId, themeColor, areaName, casts, staffs, customImg, updateErrorCallback) => {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return "";
+      const ctx = canvas.getContext("2d");
+      const W = 1024;
+      const H = 768;
+
+      ctx.fillStyle = themeColor;
+      ctx.fillRect(0, 0, W, H);
+
+      const kemoAreaH = 672; 
+      const margin = 5;
+
+      const castCount = casts.length;
+      const cols = castCount <= 4 ? 2 : 3;
+      const rowsCount = castCount <= 4 ? 2 : 2; 
+      const totalGrids = cols * rowsCount;
+
+      const cellW = W / cols;
+      const cellH = kemoAreaH / rowsCount;
+
+      for (let i = 0; i < totalGrids; i++) {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = col * cellW + margin;
+        const y = row * cellH + margin;
+        const w = cellW - margin * 2;
+        const h = cellH - margin * 2;
+
+        if (i < castCount) {
+          const cast = casts[i];
+          const imgSource = cast.overrideUrl || cast.originalUrl;
+          
+          const img = await loadImage(imgSource, (hasError) => {
+            if (hasError !== cast.loadError) {
+              updateErrorCallback(cast.id, hasError);
+            }
+          });
+
+          ctx.save();
+          ctx.rect(x, y, w, h);
+          ctx.clip();
+
+          const targetRatio = 50 / 33;
+          const cellRatio = w / h;
+          let drawW, drawH, drawX, drawY;
+
+          if (targetRatio > cellRatio) {
+            drawW = w;
+            drawH = w / targetRatio;
+            drawX = x;
+            drawY = y + (h - drawH) / 2;
+          } else {
+            drawH = h;
+            drawW = h * targetRatio;
+            drawX = x + (w - drawW) / 2;
+            drawY = y;
+          }
+
+          ctx.drawImage(img, drawX, drawY, drawW, drawH);
+          ctx.restore();
+
+        } else {
+          if (customImg !== PLACEHOLDER_SVG) {
+            const img = await loadImage(customImg, null);
+
+            ctx.save();
+            drawRoundedRect(ctx, x, y, w, h, 20);
+            ctx.clip();
+
+            ctx.fillStyle = "rgba(255, 255, 255, 0.15)";
+            ctx.fillRect(x, y, w, h);
+
+            const imgRatio = img.width / img.height;
+            const cellRatio = w / h;
+            let drawW, drawH, drawX, drawY;
+
+            if (imgRatio > cellRatio) {
+              drawH = h;
+              drawW = h * imgRatio;
+              drawX = x + (w - drawW) / 2;
+              drawY = y;
+            } else {
+              drawW = w;
+              drawH = w / imgRatio;
+              drawX = x;
+              drawY = y + (h - drawH) / 2;
+            }
+
+            ctx.drawImage(img, drawX, drawY, drawW, drawH);
+
+            ctx.strokeStyle = "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 4;
+            drawRoundedRect(ctx, x + 2, y + 2, w - 4, h - 4, 18);
+            ctx.stroke();
+
+            ctx.restore();
+          }
+        }
+      }
+
+      const staffAreaY = 672;
+      const staffAreaH = 96;
+      const bottomCellW = W / 3;
+
+      if (staffs.length > 0) {
+        const staff = staffs[0];
+        const imgSource = staff.overrideUrl || staff.originalUrl;
+        const img = await loadImage(imgSource, (hasError) => {
+          if (hasError !== staff.loadError) {
+            updateErrorCallback(staff.id, hasError);
+          }
+        });
+
+        const cellX = 0;
+        const maxW = bottomCellW - margin * 2;
+        const drawH = staffAreaH - margin * 2;
+        const imgRatio = img.width / img.height;
+        
+        let drawW = drawH * imgRatio;
+        let finalH = drawH;
+        if (drawW > maxW) {
+          drawW = maxW;
+          finalH = maxW / imgRatio;
+        }
+
+        const drawX = cellX + margin;
+        const drawY = staffAreaY + margin + (drawH - finalH) / 2;
+
+        ctx.save();
+        ctx.rect(cellX + margin, staffAreaY + margin, maxW, drawH);
+        ctx.clip();
+        ctx.drawImage(img, drawX, drawY, drawW, finalH);
+        ctx.restore();
+      }
+
+      if (staffs.length > 1) {
+        const staff = staffs[1];
+        const imgSource = staff.overrideUrl || staff.originalUrl;
+        const img = await loadImage(imgSource, (hasError) => {
+          if (hasError !== staff.loadError) {
+            updateErrorCallback(staff.id, hasError);
+          }
+        });
+
+        const cellX = bottomCellW;
+        const maxW = bottomCellW - margin * 2;
+        const drawH = staffAreaH - margin * 2;
+        const imgRatio = img.width / img.height;
+        
+        let drawW = drawH * imgRatio;
+        let finalH = drawH;
+        if (drawW > maxW) {
+          drawW = maxW;
+          finalH = maxW / imgRatio;
+        }
+
+        const drawX = cellX + margin;
+        const drawY = staffAreaY + margin + (drawH - finalH) / 2;
+
+        ctx.save();
+        ctx.rect(cellX + margin, staffAreaY + margin, maxW, drawH);
+        ctx.clip();
+        ctx.drawImage(img, drawX, drawY, drawW, finalH);
+        ctx.restore();
+      }
+
+      ctx.save();
+      ctx.font = "bold 36px 'Mochiy Pop One'";
+      ctx.textAlign = "right";
+      ctx.textBaseline = "middle";
+
+      const textX = W - 25;
+      const textY = staffAreaY + staffAreaH / 2;
+
+      ctx.strokeStyle = "#ffffff";
+      ctx.lineWidth = 10;
+      ctx.lineJoin = "round";
+      ctx.strokeText(areaName, textX, textY);
+
+      ctx.fillStyle = themeColor;
+      ctx.fillText(areaName, textX, textY);
+      ctx.restore();
+
+      return canvas.toDataURL("image/png");
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //3つの各Canvasへ並行して合成指示を出し、結果画像をプレビュー先へバインドします。
+    //なし
+    //Promise<void>
+    //例 : triggerRenderAll() => Promise<void>
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const triggerRenderAll = async () => {
+      document.getElementById("loader-mofu").classList.remove("hidden");
+      document.getElementById("loader-moujuu").classList.remove("hidden");
+      document.getElementById("loader-mizube").classList.remove("hidden");
+      document.getElementById("preview-img-mofu").classList.add("hidden");
+      document.getElementById("preview-img-moujuu").classList.add("hidden");
+      document.getElementById("preview-img-mizube").classList.add("hidden");
+
+      const mofuUrl = await renderAreaImage(
+        "canvas-mofu",
+        "#10B981", 
+        "もふもふパーク",
+        AppState.mofuCast,
+        AppState.mofuStaff,
+        AppState.mofuCustomImg,
+        (id, hasError) => {
+          updateCastErrorState('mofu', id, hasError);
+        }
+      );
+      const previewMofuImg = document.getElementById("preview-img-mofu");
+      previewMofuImg.src = mofuUrl;
+      previewMofuImg.classList.remove("hidden");
+      document.getElementById("loader-mofu").classList.add("hidden");
+
+      const moujuuUrl = await renderAreaImage(
+        "canvas-moujuu",
+        "#EA580C", 
+        "猛獣館",
+        AppState.moujuuCast,
+        AppState.moujuuStaff,
+        AppState.moujuuCustomImg,
+        (id, hasError) => {
+          updateCastErrorState('moujuu', id, hasError);
+        }
+      );
+      const previewMoujuuImg = document.getElementById("preview-img-moujuu");
+      previewMoujuuImg.src = moujuuUrl;
+      previewMoujuuImg.classList.remove("hidden");
+      document.getElementById("loader-moujuu").classList.add("hidden");
+
+      const mizubeUrl = await renderAreaImage(
+        "canvas-mizube",
+        "#0EA5E9", 
+        "みずべのなかま",
+        AppState.mizubeCast,
+        AppState.mizubeStaff,
+        AppState.mizubeCustomImg,
+        (id, hasError) => {
+          updateCastErrorState('mizube', id, hasError);
+        }
+      );
+      const previewMizubeImg = document.getElementById("preview-img-mizube");
+      previewMizubeImg.src = mizubeUrl;
+      previewMizubeImg.classList.remove("hidden");
+      document.getElementById("loader-mizube").classList.add("hidden");
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //ロード失敗を検出した画像のエラーマーク状態を更新し、リストコンポーネントのみ再描画します。
+    //areaKey (string): 対象エリアキー, id (string): キャストID, hasError (boolean): エラーフラグ
+    //void
+    //例 : updateCastErrorState("mofu", "id-123", true) => undefined
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const updateCastErrorState = (areaKey, id, hasError) => {
+      let list = [];
+      if (areaKey === 'mofu') list = AppState.mofuCast.concat(AppState.mofuStaff);
+      else if (areaKey === 'moujuu') list = AppState.moujuuCast.concat(AppState.moujuuStaff);
+      else if (areaKey === 'mizube') list = AppState.mizubeCast.concat(AppState.mizubeStaff);
+
+      const target = list.find(item => item.id === id);
+      if (target && target.loadError !== hasError) {
+        target.loadError = hasError;
+        renderAdjustmentList(areaKey);
+      }
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //パースされたCSV配列データを走査してキャスト、担当エリア、飼育員を判定し、分類リストを設定します。
+    //rows (string[][]): CSV2次元配列
+    //void
+    //例 : processCSVData(rows) => undefined
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const processCSVData = (rows) => {
+      if (!rows || rows.length === 0) return;
+
+      let detectedDate = getNextFriday();
+      const firstRowStr = rows[0].join(",");
+      const dateMatch = firstRowStr.match(/(\d{1,2})\/(\d{1,2})/);
+      if (dateMatch) {
+        const month = dateMatch[1].padStart(2, '0');
+        const day = dateMatch[2].padStart(2, '0');
+        detectedDate = `${month}${day}`;
+      }
+      AppState.eventDate = detectedDate;
+      document.getElementById("event-date").value = detectedDate;
+
+      let headerRowIdx = -1;
+      for (let i = 0; i < rows.length; i++) {
+        if (rows[i].includes("担当") || rows[i].includes("キャラシートURL")) {
+          headerRowIdx = i;
+          break;
+        }
+      }
+
+      if (headerRowIdx === -1) headerRowIdx = 1;
+
+      const headers = rows[headerRowIdx] || [];
+      const roleColIdx = headers.findIndex(h => h.includes("担当") || h.includes("役職"));
+      const urlColIdx = headers.findIndex(h => h.includes("キャラシートURL") || h.includes("URL"));
+      const nameColIdx = headers.findIndex(h => h.includes("キャスト愛称") || h.includes("VRC表示名") || h.includes("名前"));
+
+      const defaultRoleIdx = roleColIdx !== -1 ? roleColIdx : 0;
+      const defaultUrlIdx = urlColIdx !== -1 ? urlColIdx : 3;
+      const defaultNameIdx = nameColIdx !== -1 ? nameColIdx : 5;
+
+      AppState.mofuCast = [];
+      AppState.mofuStaff = [];
+      AppState.moujuuCast = [];
+      AppState.moujuuStaff = [];
+      AppState.mizubeCast = [];
+      AppState.mizubeStaff = [];
+
+      for (let i = headerRowIdx + 1; i < rows.length; i++) {
+        const row = rows[i];
+        if (!row || row.length <= 1) continue;
+
+        const role = (row[defaultRoleIdx] || "").trim();
+        const imgUrl = (row[defaultUrlIdx] || "").trim();
+        const name = (row[defaultNameIdx] || "").trim();
+
+        if (!role || !imgUrl) continue;
+
+        const castItem = {
+          id: generateId(),
+          name: name || "キャスト",
+          role: role,
+          originalUrl: imgUrl,
+          overrideUrl: null, 
+          loadError: false
+        };
+
+        if (role.includes("もふケモ")) {
+          if (AppState.mofuCast.length < 6) AppState.mofuCast.push(castItem);
+        } else if (role.includes("飼育もふ")) {
+          if (AppState.mofuStaff.length < 2) AppState.mofuStaff.push(castItem);
+        } else if (role.includes("猛獣ケモ")) {
+          if (AppState.moujuuCast.length < 6) AppState.moujuuCast.push(castItem);
+        } else if (role.includes("飼育猛獣")) {
+          if (AppState.moujuuStaff.length < 2) AppState.moujuuStaff.push(castItem);
+        } else if (role.includes("水辺ケモ")) {
+          if (AppState.mizubeCast.length < 6) AppState.mizubeCast.push(castItem);
+        } else if (role.includes("飼育水辺")) {
+          if (AppState.mizubeStaff.length < 2) AppState.mizubeStaff.push(castItem);
+        }
+      }
+
+      updateUIElements();
+      triggerRenderAll();
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //各エリアごとに調整用の調整リストを生成します。並び替えドラッグ＆ドロップ用属性を仕込みます。
+    //areaKey (string): エリア識別キー
+    //void
+    //例 : renderAdjustmentList("mofu") => undefined
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const renderAdjustmentList = (areaKey) => {
+      let casts = [];
+      let staffs = [];
+      let listElement = null;
+
+      if (areaKey === 'mofu') {
+        casts = AppState.mofuCast;
+        staffs = AppState.mofuStaff;
+        listElement = document.getElementById("list-mofu");
+      } else if (areaKey === 'moujuu') {
+        casts = AppState.moujuuCast;
+        staffs = AppState.moujuuStaff;
+        listElement = document.getElementById("list-moujuu");
+      } else if (areaKey === 'mizube') {
+        casts = AppState.mizubeCast;
+        staffs = AppState.mizubeStaff;
+        listElement = document.getElementById("list-mizube");
+      }
+
+      if (!listElement) return;
+      listElement.innerHTML = "";
+
+      casts.forEach((cast, idx) => {
+        const item = document.createElement("div");
+        item.className = `flex items-center justify-between p-2 rounded-lg border text-xs cursor-grab active:cursor-grabbing hover:bg-stone-100 transition duration-150 ${cast.loadError ? 'bg-red-50 border-red-200' : 'bg-stone-50 border-stone-200'}`;
+        item.setAttribute("draggable", "true");
+        item.setAttribute("data-index", idx);
+        item.setAttribute("data-area", areaKey);
+        
+        item.innerHTML = `
+          <div class="flex items-center gap-2 pointer-events-none">
+            <span class="text-stone-400"><i class="fa-solid fa-grip-vertical"></i></span>
+            <span class="${areaKey === 'mofu' ? 'bg-emerald-100 text-emerald-800' : areaKey === 'moujuu' ? 'bg-orange-100 text-orange-800' : 'bg-sky-100 text-sky-800'} font-bold px-1.5 py-0.5 rounded text-[10px]">ケモ${idx+1}</span>
+            <span class="font-bold truncate max-w-[120px]">${cast.name}</span>
+            ${cast.loadError ? '<span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 読込失敗</span>' : ''}
+          </div>
+          <label class="bg-white hover:bg-stone-100 border text-stone-600 font-bold py-1 px-2.5 rounded cursor-pointer transition duration-150">
+            画像変更
+            <input type="file" accept="image/*" class="hidden override-cast-input" data-area="${areaKey}" data-type="cast" data-id="${cast.id}" />
+          </label>
+        `;
+        
+        item.addEventListener("dragstart", (e) => {
+          dragSrcEl = item;
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', idx);
+          item.classList.add('opacity-40');
+        });
+
+        item.addEventListener("dragover", (e) => {
+          if (e.preventDefault) e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          return false;
+        });
+
+        item.addEventListener("drop", (e) => {
+          if (e.stopPropagation) e.stopPropagation();
+          const fromIdx = parseInt(e.dataTransfer.getData('text/plain'), 10);
+          const toIdx = idx;
+
+          if (fromIdx !== toIdx) {
+            const [removed] = casts.splice(fromIdx, 1);
+            casts.splice(toIdx, 0, removed);
+            renderAdjustmentList(areaKey);
+            triggerRenderAll();
+          }
+          return false;
+        });
+
+        item.addEventListener("dragend", () => {
+          item.classList.remove('opacity-40');
+        });
+
+        listElement.appendChild(item);
+      });
+
+      const hasCustomSlot = (casts.length % 2 !== 0 && casts.length <= 4) || casts.length === 5;
+      if (hasCustomSlot) {
+        const item = document.createElement("div");
+        item.className = "flex items-center justify-between p-2 rounded-lg border border-amber-200 bg-amber-50/40 text-xs";
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded text-[10px]">ベストショット</span>
+            <span class="text-stone-600">過去のベストショット！（任意）</span>
+          </div>
+          <label class="bg-amber-600 hover:bg-amber-500 text-white font-bold py-1 px-2.5 rounded cursor-pointer transition duration-150">
+            画像設定
+            <input type="file" accept="image/*" class="hidden override-custom-input" data-area="${areaKey}" />
+          </label>
+        `;
+        listElement.appendChild(item);
+      }
+
+      staffs.forEach((staff, idx) => {
+        const item = document.createElement("div");
+        item.className = `flex items-center justify-between p-2 rounded-lg border text-xs ${staff.loadError ? 'bg-red-50 border-red-200' : 'bg-stone-50 border-stone-200'}`;
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="bg-stone-700 text-white font-bold px-1.5 py-0.5 rounded text-[10px]">飼育員${idx+1}</span>
+            <span class="font-bold truncate max-w-[120px]">${staff.name}</span>
+            ${staff.loadError ? '<span class="text-red-500 font-bold"><i class="fa-solid fa-triangle-exclamation"></i> 読込失敗</span>' : ''}
+          </div>
+          <label class="bg-white hover:bg-stone-100 border text-stone-600 font-bold py-1 px-2.5 rounded cursor-pointer transition duration-150">
+            画像変更
+            <input type="file" accept="image/*" class="hidden override-cast-input" data-area="${areaKey}" data-type="staff" data-id="${staff.id}" />
+          </label>
+        `;
+        listElement.appendChild(item);
+      });
+
+      listElement.querySelectorAll(".override-cast-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const area = e.target.getAttribute("data-area");
+          const type = e.target.getAttribute("data-type");
+          const id = e.target.getAttribute("data-id");
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            const dataUrl = evt.target.result;
+            let list = [];
+            if (area === 'mofu') list = (type === 'cast') ? AppState.mofuCast : AppState.mofuStaff;
+            else if (area === 'moujuu') list = (type === 'cast') ? AppState.moujuuCast : AppState.moujuuStaff;
+            else if (area === 'mizube') list = (type === 'cast') ? AppState.mizubeCast : AppState.mizubeStaff;
+
+            const target = list.find(item => item.id === id);
+            if (target) {
+              target.overrideUrl = dataUrl;
+              target.loadError = false;
+              renderAdjustmentList(area);
+              triggerRenderAll();
+            }
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+
+      listElement.querySelectorAll(".override-custom-input").forEach(input => {
+        input.addEventListener("change", (e) => {
+          const area = e.target.getAttribute("data-area");
+          const file = e.target.files[0];
+          if (!file) return;
+
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            const dataUrl = evt.target.result;
+            if (area === 'mofu') AppState.mofuCustomImg = dataUrl;
+            else if (area === 'moujuu') AppState.moujuuCustomImg = dataUrl;
+            else if (area === 'mizube') AppState.mizubeCustomImg = dataUrl;
+            renderAdjustmentList(area);
+            triggerRenderAll();
+          };
+          reader.readAsDataURL(file);
+        });
+      });
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //ロード完了にあたって保存予定ファイル名やレイアウト非表示フラグの開閉を実行します。
+    //なし
+    //void
+    //例 : updateUIElements() => undefined
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const updateUIElements = () => {
+      document.getElementById("filename-mofu").innerText = `mofu_imagepad_${AppState.eventDate}.png`;
+      document.getElementById("filename-moujuu").innerText = `moujuu_imagepad_${AppState.eventDate}.png`;
+      document.getElementById("filename-mizube").innerText = `mizube_imagepad_${AppState.eventDate}.png`;
+
+      renderAdjustmentList('mofu');
+      renderAdjustmentList('moujuu');
+      renderAdjustmentList('mizube');
+
+      document.getElementById("empty-state").classList.add("hidden");
+      document.getElementById("results-area").classList.remove("hidden");
+      document.getElementById("download-panel").classList.remove("opacity-60", "pointer-events-none");
+    };
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //チェックが入っているエリアの画像を1つのZIPファイルに圧縮し、まとめてダウンロードします。
+    //なし
+    //Promise<void>
+    //例 : handleDownloadAll() => Promise<void>
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    const handleDownloadAll = async () => {
+      const checkMofu = document.getElementById("check-mofu").checked;
+      const checkMoujuu = document.getElementById("check-moujuu").checked;
+      const checkMizube = document.getElementById("check-mizube").checked;
+
+      if (!checkMofu && !checkMoujuu && !checkMizube) {
+        return;
+      }
+
+      if (typeof JSZip === 'undefined') {
+        console.error("JSZipが読み込まれていません。");
+        return;
+      }
+
+      const zip = new JSZip();
+      let hasFiles = false;
+
+      const addToZip = (canvasId, filename) => {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const dataUrl = canvas.toDataURL("image/png");
+        const base64Data = dataUrl.split(",")[1];
+        zip.file(filename, base64Data, { base64: true });
+        hasFiles = true;
+      };
+
+      if (checkMofu) {
+        addToZip("canvas-mofu", `mofu_imagepad_${AppState.eventDate}.png`);
+      }
+      if (checkMoujuu) {
+        addToZip("canvas-moujuu", `moujuu_imagepad_${AppState.eventDate}.png`);
+      }
+      if (checkMizube) {
+        addToZip("canvas-mizube", `mizube_imagepad_${AppState.eventDate}.png`);
+      }
+
+      if (hasFiles) {
+        const downloadBtn = document.getElementById("download-all-btn");
+        const originalText = downloadBtn.innerHTML;
+        downloadBtn.disabled = true;
+        downloadBtn.innerHTML = '<i class="fa-solid fa-file-zipper fa-spin mr-2"></i> 圧縮中...';
+
+        try {
+          const content = await zip.generateAsync({ type: "blob" });
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(content);
+          link.download = `vrc_imagepad_${AppState.eventDate}.zip`;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        } catch (err) {
+          console.error("ZIPファイルの作成に失敗しました:", err);
+        } finally {
+          downloadBtn.disabled = false;
+          downloadBtn.innerHTML = originalText;
+        }
+      }
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const fileInput = document.getElementById("csv-file-input");
+      const fileLabelText = document.getElementById("file-label-text");
+      const loadCsvBtn = document.getElementById("load-csv-btn");
+      const eventDateInput = document.getElementById("event-date");
+      const downloadAllBtn = document.getElementById("download-all-btn");
+
+      const nextFri = getNextFriday();
+      AppState.eventDate = nextFri;
+      eventDateInput.value = nextFri;
+
+      eventDateInput.addEventListener("input", (e) => {
+        AppState.eventDate = e.target.value || "1025";
+        document.getElementById("filename-mofu").innerText = `mofu_imagepad_${AppState.eventDate}.png`;
+        document.getElementById("filename-moujuu").innerText = `moujuu_imagepad_${AppState.eventDate}.png`;
+        document.getElementById("filename-mizube").innerText = `mizube_imagepad_${AppState.eventDate}.png`;
+      });
+
+      fileInput.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        fileLabelText.innerText = `選択中: ${file.name}`;
+        
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+          AppState.rawCsvText = evt.target.result;
+          loadCsvBtn.disabled = false;
+          loadCsvBtn.className = "w-full py-2.5 rounded-xl font-bold font-mochiy text-xs shadow-sm transition duration-200 flex items-center justify-center gap-2 bg-amber-600 hover:bg-amber-500 text-white cursor-pointer";
+        };
+        reader.readAsText(file, "utf-8");
+      });
+
+      loadCsvBtn.addEventListener("click", () => {
+        if (!AppState.rawCsvText) return;
+        const parsed = parseCSV(AppState.rawCsvText);
+        processCSVData(parsed);
+      });
+
+      downloadAllBtn.addEventListener("click", handleDownloadAll);
+    });
+  </script>
+</body>
+</html>
