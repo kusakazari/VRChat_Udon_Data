@@ -9,7 +9,7 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&family=Zen+Maru+Gothic:wght@500;700;900&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- html2canvas (For generating images) -->
@@ -17,23 +17,23 @@
   
   <style>
     body {
-      font-family: 'Zen Maru Gothic', sans-serif;
+      font-family: 'Zen Maru Gothic', 'Quicksand', sans-serif;
+      background-color: #f7f3eb;
+      background-image: radial-gradient(#e5ddd0 1px, transparent 1px);
+      background-size: 20px 20px;
     }
     .font-pop {
       font-family: 'Mochiy Pop One', sans-serif;
     }
-    /* 画像切り切り円形用 */
     .avatar-container {
       position: relative;
       overflow: hidden;
     }
-    /* 編集可能エリアのホバー効果 */
     .editable-focus:hover {
       background-color: rgba(0, 0, 0, 0.05);
       border-radius: 4px;
       cursor: pointer;
     }
-    /* スクロールバーのデザインを薄くおしゃれに */
     .custom-scrollbar::-webkit-scrollbar {
       width: 4px;
     }
@@ -49,15 +49,15 @@
     }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen py-8 px-4 flex flex-col items-center justify-start select-none">
+<body class="min-h-screen py-8 px-4 flex flex-col items-center justify-start select-none">
 
   <!-- メインコンテナ -->
   <div class="w-full max-w-4xl flex flex-col items-center">
     
-    <!-- キャストボード本体 (この範囲を画像化する) -->
-    <div id="capture-area" class="w-full aspect-[4/5] max-w-[700px] bg-gradient-to-b from-[#bfe6f7] via-[#bfe6f7] to-[#80c883] px-4 pt-3 pb-6 rounded-3xl shadow-xl flex flex-col justify-start relative overflow-hidden bg-cover bg-center" style="min-height: 850px;">
+    <!-- キャストボード本体 -->
+    <div id="capture-area" class="w-full aspect-[4/5] max-w-[700px] bg-gradient-to-b from-[#bfe6f7] via-[#bfe6f7] to-[#80c883] px-4 pt-4 pb-6 rounded-3xl shadow-xl flex flex-col justify-start relative overflow-hidden bg-cover bg-center" style="min-height: 850px;">
       
-      <!-- 背景の雲のような装飾デコレーション (SVG) - 背景画像が設定された時にも干渉しないように配置 -->
+      <!-- 背景のデコレーション (SVG) -->
       <div id="clouds-deco" class="absolute inset-0 pointer-events-none opacity-40">
         <svg class="absolute -top-10 -left-10 w-64 h-64 fill-white" viewBox="0 0 200 200">
           <path d="M100,50 C120,50 130,70 150,70 C170,70 180,90 170,110 C160,130 140,140 120,130 C100,140 80,140 60,130 C40,140 30,120 40,100 C30,80 40,50 70,60 C80,50 90,50 100,50 Z"/>
@@ -74,9 +74,8 @@
       <div class="relative z-10 w-full h-full flex flex-col justify-between flex-grow">
         
         <!-- ヘッダー：日付エリア -->
-        <div class="w-full flex justify-center mb-2">
+        <div class="w-full flex justify-center mb-3 shrink-0">
           <div class="bg-white/85 backdrop-blur-sm border-4 border-sky-200 rounded-full px-6 py-2 w-[90%] text-center shadow-md relative group">
-            <!-- [日付 / DATE] を VRCふれあい動物園（緑色フォント）に調整 -->
             <div class="text-[12px] md:text-sm font-black text-emerald-600 tracking-wider font-pop">VRCふれあい動物園</div>
             <div class="flex items-center justify-center gap-2">
               <span id="date-text" class="text-xl md:text-2xl font-black text-slate-800 font-pop editable-focus px-2 py-0.5 outline-none min-w-[200px]" contenteditable="true">6/12 出演キャスト</span>
@@ -85,69 +84,66 @@
           </div>
         </div>
 
-        <!-- メイングリッド: 3つのエリア -->
-        <div class="grid grid-cols-3 gap-2 flex-grow mb-3">
+        <!-- メイングリッド -->
+        <div class="grid grid-cols-3 gap-2 flex-grow mb-3 items-stretch">
           
           <!-- みずべのなかま (青) -->
           <div class="bg-[#4198c6]/90 p-2 md:p-2.5 rounded-3xl flex flex-col items-center border-4 border-white/60 shadow-lg h-full justify-start">
-            <h2 class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-black font-pop tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] mb-1.5">みずべのなかま</h2>
-            <!-- スクロールをカード部分のみで完結させるため高さを最大400px〜450pxに制限 -->
-            <div id="group-1-cards" class="w-full flex flex-col gap-1 flex-grow justify-start overflow-y-auto custom-scrollbar h-[400px] md:h-[450px] pr-0.5">
+            <h2 class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-black font-pop tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] mb-1.5 shrink-0">みずべのなかま</h2>
+            <div id="group-1-cards" class="w-full flex flex-col gap-1 flex-grow justify-start overflow-y-auto custom-scrollbar min-h-[350px] pr-0.5">
               <!-- JSでカードが動的に生成されます -->
             </div>
           </div>
 
           <!-- 猛獣館 (赤) -->
           <div class="bg-[#ef3c42]/90 p-2 md:p-2.5 rounded-3xl flex flex-col items-center border-4 border-white/60 shadow-lg h-full justify-start">
-            <h2 class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-black font-pop tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] mb-1.5">猛獣館</h2>
-            <div id="group-2-cards" class="w-full flex flex-col gap-1 flex-grow justify-start overflow-y-auto custom-scrollbar h-[400px] md:h-[450px] pr-0.5">
+            <h2 class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-black font-pop tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] mb-1.5 shrink-0">猛獣館</h2>
+            <div id="group-2-cards" class="w-full flex flex-col gap-1 flex-grow justify-start overflow-y-auto custom-scrollbar min-h-[350px] pr-0.5">
               <!-- JSでカードが動的に生成されます -->
             </div>
           </div>
 
-          <!-- もふもふパーク (緑) -->
+          <!-- もふモフパーク (緑) -->
           <div class="bg-[#3e8b65]/90 p-2 md:p-2.5 rounded-3xl flex flex-col items-center border-4 border-white/60 shadow-lg h-full justify-start">
-            <h2 class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-black font-pop tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] mb-1.5">もふもふパーク</h2>
-            <div id="group-3-cards" class="w-full flex flex-col gap-1 flex-grow justify-start overflow-y-auto custom-scrollbar h-[400px] md:h-[450px] pr-0.5">
+            <h2 class="text-white text-xs sm:text-sm md:text-base lg:text-lg font-black font-pop tracking-wider drop-shadow-[0_2px_2px_rgba(0,0,0,0.5)] mb-1.5 shrink-0">もふもふパーク</h2>
+            <div id="group-3-cards" class="w-full flex flex-col gap-1 flex-grow justify-start overflow-y-auto custom-scrollbar min-h-[350px] pr-0.5">
               <!-- JSでカードが動的に生成されます -->
             </div>
           </div>
 
         </div>
 
-        <!-- フッターエリア: 送信者 & メッセージ -->
-        <div class="flex flex-col md:flex-row gap-3 items-end w-full mt-auto">
+        <!-- フッターエリア -->
+        <div class="flex flex-col md:flex-row gap-3 items-stretch w-full mt-auto shrink-0">
           
-          <!-- 送信者ブロック -->
-          <div class="w-full md:w-[35%] bg-white/90 backdrop-blur-sm p-3 rounded-2xl border-4 border-sky-100 shadow-md flex items-center gap-3">
-            <div class="relative w-14 h-14 md:w-16 md:h-16 rounded-full bg-slate-300 border-2 border-slate-400 flex items-center justify-center overflow-hidden shrink-0 group">
-              <img id="sender-avatar" class="w-full h-full object-cover hidden" src="" alt="Sender Image">
-              <div id="sender-placeholder" class="text-slate-500"><i data-lucide="camera" class="w-7 h-7"></i></div>
-              <button onclick="triggerFileInput('sender-file-input')" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs">
-                <i data-lucide="edit-3" class="w-4 h-4"></i>
-              </button>
-              <input type="file" id="sender-file-input" class="hidden" accept="image/*" onchange="handleImageUpload(event, 'sender-avatar', 'sender-placeholder')">
-            </div>
-            <div class="flex-grow min-w-0">
-              <div class="flex items-center gap-1">
-                <div id="sender-name" class="font-black text-slate-800 editable-focus outline-none w-full block leading-normal min-h-[1.5rem]" contenteditable="true" placeholder="お名前を入力" onkeyup="adjustSenderNameSize()" oninput="adjustSenderNameSize()"></div>
-                <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400 shrink-0"></i>
-              </div>
-            </div>
-          </div>
+	  <div class="w-full md:w-[50%] bg-white/90 backdrop-blur-sm p-6 rounded-3xl border-4 border-sky-100 shadow-md flex items-center gap-5">
+	    <div class="relative w-24 h-24 md:w-32 md:h-32 rounded-full bg-slate-300 border-4 border-slate-400 flex items-center justify-center overflow-hidden shrink-0 group">
+	      <img id="sender-avatar" class="w-full h-full object-cover hidden" src="" alt="Sender Image">
+	      <div id="sender-placeholder" class="text-slate-500"><i data-lucide="camera" class="w-12 h-12"></i></div>
+	      <button onclick="triggerFileInput('sender-file-input')" class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-sm">
+	        <i data-lucide="edit-3" class="w-6 h-6"></i>
+	      </button>
+	      <input type="file" id="sender-file-input" class="hidden" accept="image/*" onchange="handleImageUpload(event, 'sender-avatar', 'sender-placeholder')">
+	    </div>
+	    
+	    <div class="flex-grow min-w-0">
+	      <div class="flex items-center gap-2">
+	        <div id="sender-name" class="font-black text-slate-800 text-xl md:text-2xl editable-focus outline-none w-full block leading-normal min-h-[2rem]" contenteditable="true" placeholder="お名前を入力" onkeyup="adjustSenderNameSize()" oninput="adjustSenderNameSize()"></div>
+	        <i data-lucide="pencil" class="w-5 h-5 text-slate-400 shrink-0"></i>
+	      </div>
+	    </div>
+	  </div>
 
-          <!-- メッセージ吹き出しブロック -->
-          <div class="w-full md:w-[65%] bg-white rounded-2xl p-3 shadow-md border-4 border-sky-100 relative min-h-[90px] flex flex-col justify-center">
-            <!-- 吹き出しのトゲ（三角形）要素を削除しました -->
-            
-            <!-- [メッセージ / MESSAGE] を [園長からの一言] に変更 -->
-            <div class="text-[10px] font-black text-slate-500 mb-1 font-pop">[園長からの一言]</div>
-            <div class="flex items-start gap-1">
-              <div id="message-text" class="text-xs md:text-sm font-bold text-slate-700 w-full outline-none editable-focus leading-relaxed whitespace-pre-wrap" contenteditable="true">みんなの来園待ってるよ〜！
+  <div class="w-full md:w-[50%] bg-white rounded-3xl p-6 shadow-md border-4 border-sky-100 relative min-h-[180px] flex flex-col justify-center">
+    <div class="text-[12px] font-black text-slate-500 mb-2 font-pop">[園長からの一言]</div>
+    <div class="flex items-start gap-2">
+      <div id="message-text" class="text-sm md:text-lg font-bold text-slate-700 w-full outline-none editable-focus leading-relaxed whitespace-pre-wrap" contenteditable="true">みんなの来園待ってるよ〜！
 お気に入りの動物たちに会いにきてね！</div>
-              <i data-lucide="pencil" class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5"></i>
-            </div>
-          </div>
+      <i data-lucide="pencil" class="w-5 h-5 text-slate-400 shrink-0 mt-1"></i>
+    </div>
+  </div>
+
+</div>
 
         </div>
 
@@ -156,30 +152,28 @@
 
     <!-- アクションコントロールパネル -->
     <div class="w-full max-w-[700px] mt-6 flex flex-wrap gap-3 justify-center md:justify-end">
-      <!-- 背景画像アップロードボタン -->
-      <button onclick="triggerFileInput('bg-file-input')" class="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-sm md:text-base">
-        <i data-lucide="image" class="w-5 h-5"></i>
+      <button onclick="triggerFileInput('bg-file-input')" class="flex items-center gap-2 bg-stone-700 hover:bg-stone-600 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-xs md:text-sm">
+        <i data-lucide="image" class="w-4.5 h-4.5"></i>
         <span>背景画像をアップロード</span>
       </button>
       <input type="file" id="bg-file-input" class="hidden" accept="image/*" onchange="handleBgUpload(event)">
 
-      <!-- CSVインポートボタン -->
-      <button onclick="triggerFileInput('csv-file-input')" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-700 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-sm md:text-base">
-        <i data-lucide="file-spreadsheet" class="w-5 h-5"></i>
+      <button onclick="triggerFileInput('csv-file-input')" class="flex items-center gap-2 bg-amber-600 hover:bg-amber-500 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-xs md:text-sm">
+        <i data-lucide="file-spreadsheet" class="w-4.5 h-4.5"></i>
         <span>CSVをインポート</span>
       </button>
       <input type="file" id="csv-file-input" class="hidden" accept=".csv,text/csv" onchange="handleCSVUpload(event)">
 
-      <button onclick="saveTemplate()" class="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-sm md:text-base">
-        <i data-lucide="save" class="w-5 h-5"></i>
+      <button onclick="saveTemplate()" class="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-xs md:text-sm">
+        <i data-lucide="save" class="w-4.5 h-4.5"></i>
         <span>テンプレートを保存</span>
       </button>
-      <button onclick="exportAsImage()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-sm md:text-base">
-        <i data-lucide="download" class="w-5 h-5"></i>
+      <button onclick="exportAsImage()" class="flex items-center gap-2 bg-amber-700 hover:bg-amber-600 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-xs md:text-sm">
+        <i data-lucide="download" class="w-4.5 h-4.5"></i>
         <span>画像として書き出し</span>
       </button>
-      <button onclick="openConfirmModal()" class="flex items-center gap-2 bg-slate-500 hover:bg-slate-600 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-sm md:text-base">
-        <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+      <button onclick="openConfirmModal()" class="flex items-center gap-2 bg-stone-400 hover:bg-stone-500 text-white font-black px-5 py-3 rounded-xl shadow-md transition-all active:scale-95 text-xs md:text-sm">
+        <i data-lucide="rotate-ccw" class="w-4.5 h-4.5"></i>
         <span>すべてをリセット</span>
       </button>
     </div>
@@ -188,12 +182,12 @@
 
   <!-- リセット確認用カスタムモーダル -->
   <div id="confirm-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center hidden opacity-0 transition-opacity duration-200">
-    <div id="confirm-modal-content" class="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl border-4 border-slate-200 text-center transform scale-95 transition-transform duration-200">
+    <div id="confirm-modal-content" class="bg-white rounded-3xl p-6 max-w-sm w-full mx-4 shadow-2xl border-4 border-stone-200 text-center transform scale-95 transition-transform duration-200">
       <h3 class="text-lg font-black text-slate-800 mb-2 font-pop">リセットの確認</h3>
       <p class="text-sm text-slate-600 mb-6 leading-relaxed">すべての編集内容をリセットして初期データに戻しますか？この操作は取り消せません。</p>
       <div class="flex gap-3 justify-center">
         <button onclick="closeConfirmModal()" class="px-5 py-2.5 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-700 font-black text-sm transition-colors active:scale-95">キャンセル</button>
-        <button onclick="executeReset()" class="px-5 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-sm shadow-md transition-colors active:scale-95">リセットする</button>
+        <button onclick="executeReset()" class="px-5 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-white font-black text-sm shadow-md transition-colors active:scale-95">リセットする</button>
       </div>
     </div>
   </div>
@@ -203,8 +197,12 @@
     <span id="toast-message">メッセージ</span>
   </div>
 
+  <!-- フッター -->
+  <footer class="text-center py-6 text-[10px] text-stone-500 shrink-0">
+    VRCふれあい動物園 Staff Tool. Created by kusa_kazari.
+  </footer>
+
   <script>
-    // 完全に初期値が空で構築されるキャストデータ構造
     const defaultCasts = {
       group1: {
         staff: [{ name: "", role: "飼育員", img: "" }],
@@ -220,13 +218,9 @@
       }
     };
 
-    // 現在のアクティブなボードデータ
     let currentBoardData = JSON.parse(JSON.stringify(defaultCasts));
-
-    // 背景画像URLの格納用グローバル変数
     let customBgBase64 = "";
 
-    // 起動時にロードするメイン処理
     window.onload = function() {
       lucide.createIcons();
       loadBoardState();
@@ -234,10 +228,10 @@
     };
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 園長の名前の文字数に応じてフォントサイズを自動調整する
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : adjustSenderNameSize() => void
+    //園長の名前の文字数に応じてフォントサイズを自動調整します。
+    //なし
+    //void
+    //例 : adjustSenderNameSize() => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function adjustSenderNameSize() {
       const el = document.getElementById('sender-name');
@@ -245,83 +239,122 @@
       
       let fontSize;
       if (textLength <= 4) {
-        fontSize = '1rem'; // 16px
+        fontSize = '1rem'; 
       } else if (textLength <= 6) {
-        fontSize = '0.875rem'; // 14px
+        fontSize = '0.875rem'; 
       } else if (textLength <= 10) {
-        fontSize = '0.75rem'; // 12px
+        fontSize = '0.75rem'; 
       } else if (textLength <= 14) {
-        fontSize = '0.625rem'; // 10px
+        fontSize = '0.625rem'; 
       } else {
-        fontSize = '0.5rem'; // 8px
+        fontSize = '0.5rem'; 
       }
       
       el.style.fontSize = fontSize;
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // ボード全体のレンダリングを再実行する
-    // 引数：data (Object) - レンダリング対象のボードデータ
-    // 戻り値：なし
-    // 例 : renderBoard(currentBoardData) => void
+    //ボード全体のレンダリングを再実行します。
+    //最大人数に基づいて全員の一人あたりのカードの高さを均一化します。
+    //data (Object): 描写するボードデータ構造
+    //void
+    //例 : renderBoard(currentBoardData) => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function renderBoard(data = defaultCasts) {
       currentBoardData = data;
-      renderGroup('group-1-cards', data.group1, 'group1');
-      renderGroup('group-2-cards', data.group2, 'group2');
-      renderGroup('group-3-cards', data.group3, 'group3');
+
+      // 3つのエリアの中で最もキャスト総数（飼育員＋ケモ）が多い最大人数を計算
+      const count1 = (data.group1.staff || []).length + (data.group1.kemo || []).length;
+      const count2 = (data.group2.staff || []).length + (data.group2.kemo || []).length;
+      const count3 = (data.group3.staff || []).length + (data.group3.kemo || []).length;
+      const maxTotalCount = Math.max(count1, count2, count3);
+
+      // 最も人数の多いグループに合わせた共通のサイズクラスを算出
+      const commonSizeClasses = getGroupCardSettings(maxTotalCount);
+
+      // すべてのグループを同じサイズ設定に揃えてレンダリング
+      renderGroup('group-1-cards', data.group1, 'group1', commonSizeClasses);
+      renderGroup('group-2-cards', data.group2, 'group2', commonSizeClasses);
+      renderGroup('group-3-cards', data.group3, 'group3', commonSizeClasses);
+      
+      adjustEqualHeights();
       lucide.createIcons();
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 飼育員とケモに分類されたカードリストを余白を挟んで描画する
-    // 引数：containerId (string), groupData (Object), groupKey (string)
-    // 戻り値：なし
-    // 例 : renderGroup('group-1-cards', {staff: [], kemo: []}, 'group1') => void
+    //みずべ、猛獣、もふもふの3エリアの高さを最も人数が多い列に自動で合わせます。
+    //なし
+    //void
+    //例 : adjustEqualHeights() => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    function renderGroup(containerId, groupData, groupKey) {
+    function adjustEqualHeights() {
+      const container1 = document.getElementById('group-1-cards');
+      const container2 = document.getElementById('group-2-cards');
+      const container3 = document.getElementById('group-3-cards');
+
+      container1.style.height = 'auto';
+      container2.style.height = 'auto';
+      container3.style.height = 'auto';
+
+      const h1 = container1.scrollHeight;
+      const h2 = container2.scrollHeight;
+      const h3 = container3.scrollHeight;
+
+      const maxHeight = Math.max(h1, h2, h3, 380); 
+
+      container1.style.height = maxHeight + 'px';
+      container2.style.height = maxHeight + 'px';
+      container3.style.height = maxHeight + 'px';
+    }
+
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //飼育員とケモに分類されたカードリストを余白を挟んで描画します。
+    //containerId (string), groupData (Object), groupKey (string), sizeClasses (Object)
+    //void
+    //例 : renderGroup('group-1-cards', {staff: [], kemo: []}, 'group1', size) => undefined
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    function renderGroup(containerId, groupData, groupKey, sizeClasses) {
       const container = document.getElementById(containerId);
       container.innerHTML = '';
 
       const staffList = groupData.staff || [];
       const kemoList = groupData.kemo || [];
-      const totalCount = staffList.length + kemoList.length;
-      const sizeClasses = getGroupCardSettings(totalCount);
 
-      // 1. 飼育員リストの描画
       staffList.forEach((cast, index) => {
         container.insertAdjacentHTML('beforeend', generateCardHtml(groupKey, 'staff', index, cast, sizeClasses));
       });
 
-      // 飼育員追加用ボタン
       container.insertAdjacentHTML('beforeend', `
-        <button onclick="addCast('${groupKey}', 'staff')" class="action-btn w-full py-0.5 border-2 border-dashed border-white/40 hover:border-white/80 rounded-xl text-[9px] font-black text-white/60 hover:text-white transition-all flex items-center justify-center gap-1 mt-0.5">
+        <button onclick="addCast('${groupKey}', 'staff')" class="action-btn w-full py-1 border border-dashed border-white/40 hover:border-white/80 rounded-xl text-[9px] font-black text-white/60 hover:text-white transition-all flex items-center justify-center gap-1 mt-0.5">
           <i data-lucide="plus" class="w-3 h-3"></i>
           <span>追加</span>
         </button>
       `);
 
-      // 2. 飼育員とケモの間の仕切り
       container.insertAdjacentHTML('beforeend', `
         <div class="w-full flex items-center justify-center py-1 opacity-50 select-none">
           <div class="border-t-2 border-dashed border-white/30 w-full"></div>
         </div>
       `);
 
-      // 3. ケモリストの描画
       kemoList.forEach((cast, index) => {
         container.insertAdjacentHTML('beforeend', generateCardHtml(groupKey, 'kemo', index, cast, sizeClasses));
       });
 
-      // ケモ追加用ボタン
       container.insertAdjacentHTML('beforeend', `
-        <button onclick="addCast('${groupKey}', 'kemo')" class="action-btn w-full py-0.5 border-2 border-dashed border-white/40 hover:border-white/80 rounded-xl text-[9px] font-black text-white/60 hover:text-white transition-all flex items-center justify-center gap-1 mt-0.5">
+        <button onclick="addCast('${groupKey}', 'kemo')" class="action-btn w-full py-1 border border-dashed border-white/40 hover:border-white/80 rounded-xl text-[9px] font-black text-white/60 hover:text-white transition-all flex items-center justify-center gap-1 mt-0.5">
           <i data-lucide="plus" class="w-3 h-3"></i>
           <span>追加</span>
         </button>
       `);
     }
 
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
+    //キャストのトータル人数に応じて最適なサイズ調整用のTailwind CSSクラスを算出します。
+    //totalCount (number): 対象エリアのキャスト総数
+    //Object (レイアウトクラスのキーマップ)
+    //例 : getGroupCardSettings(8) => { wrapper: "...", ... }
+    //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function getGroupCardSettings(totalCount) {
       if (totalCount <= 6) {
         return {
@@ -355,10 +388,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 単体のキャストカードのHTMLタグ構造を動的に生成する (高さを縮小し見切れを防ぐ)
-    // 引数：groupKey (string), type (string), index (number), cast (Object)
-    // 戻り値：string (生成されたHTML文字列)
-    // 例 : generateCardHtml('group1', 'staff', 0, {name: '...', ...}) => HTML
+    //単体のキャストカードのHTMLタグ構造を動的に生成します。
+    //groupKey (string), type (string), index (number), cast (Object), sizeClasses (Object)
+    //string (HTMLの構成テキスト)
+    //例 : generateCardHtml('group1', 'staff', 0, cast, settings) => HTML文字列
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function generateCardHtml(groupKey, type, index, cast, sizeClasses = {}) {
       const cardId = `${groupKey}-${type}-${index}`;
@@ -367,18 +400,16 @@
       const roleClass = sizeClasses.role || 'text-[10px] md:text-[11px]';
       const nameClass = sizeClasses.name || 'text-[13px] md:text-base';
       
-      const displayName = cast.name ? cast.name : `<span id="${cardId}-placeholder-text" class="text-slate-300 text-[10px] md:text-xs">キャスト名</span>`;
+      const displayName = cast.name ? cast.name : `<span id="${cardId}-placeholder-text" class="text-slate-300 text-[10px] md:text-xs font-medium">キャスト名</span>`;
       const displayRole = cast.role ? cast.role : (type === 'staff' ? '飼育員' : 'ケモ');
 
       return `
         <div class="bg-white rounded-xl ${wrapperClass} flex items-start gap-2 shadow-sm border border-slate-100 relative group transition-all overflow-visible">
           
-          <!-- 個別削除用ゴミ箱ボタン -->
           <button onclick="deleteCast('${groupKey}', '${type}', ${index})" class="action-btn absolute -top-1 -right-1 bg-rose-500 hover:bg-rose-600 text-white rounded-full p-0.5 shadow-md opacity-0 group-hover:opacity-100 transition-opacity z-20">
             <i data-lucide="trash-2" class="w-2.5 h-2.5"></i>
           </button>
 
-          <!-- アバターサークル -->
           <div class="relative w-10 h-10 md:w-11 md:h-11 rounded-full bg-slate-200 border border-slate-300 flex items-center justify-center overflow-hidden shrink-0">
             <img id="${cardId}-avatar" class="w-full h-full object-cover ${hasImg ? '' : 'hidden'}" src="${cast.img || ''}" alt="Cast Avatar">
             <div id="${cardId}-placeholder" class="text-slate-400 ${hasImg ? 'hidden' : ''}">
@@ -390,11 +421,9 @@
             <input type="file" id="${cardId}-file" class="hidden" accept="image/*" onchange="handleImageUpload(event, '${cardId}-avatar', '${cardId}-placeholder')">
           </div>
 
-          <!-- 情報テキストエリア -->
-          <div class="flex-grow min-w-0 flex flex-col justify-start gap-1">
+          <div class="flex-grow min-w-0 flex flex-col justify-start gap-1 text-left">
             <p id="${cardId}-role" class="${roleClass} font-black text-slate-400 font-pop editable-focus px-1 max-w-[70px] outline-none leading-normal whitespace-nowrap overflow-visible" contenteditable="true" placeholder="役職">${displayRole}</p>
             <div class="flex items-start justify-between gap-1 w-full">
-              <!-- キャスト名 -->
               <div onclick="editName('${cardId}')" class="w-full block cursor-pointer hover:bg-slate-50 rounded px-1 py-1 transition-colors overflow-visible">
                 <p id="${cardId}-name" class="font-black ${nameClass} text-slate-700 w-full block leading-relaxed whitespace-normal overflow-visible">${displayName}</p>
               </div>
@@ -405,10 +434,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // キャストをリストへ動的に追加する
-    // 引数：groupKey (string), type (string)
-    // 戻り値：なし
-    // 例 : addCast('group1', 'kemo') => void
+    //キャストをリストへ動的に追加します。
+    //なし
+    //void
+    //例 : addCast('group1', 'kemo') => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function addCast(groupKey, type) {
       syncDataFromDOM();
@@ -421,10 +450,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // キャストをリストから削除する
-    // 引数：groupKey (string), type (string), index (number)
-    // 戻り値：なし
-    // 例 : deleteCast('group1', 'staff', 2) => void
+    //キャストをリストから削除します。
+    //なし
+    //void
+    //例 : deleteCast('group1', 'staff', 0) => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function deleteCast(groupKey, type, index) {
       syncDataFromDOM();
@@ -436,14 +465,13 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 名前のテキストをクリックされた際にプロンプト経由で編集する
-    // 引数：cardId (string)
-    // 戻り値：なし
-    // 例 : editName('group1-staff-0') => void
+    //名前のテキストをポップアップ入力経由で安全に上書き編集します。
+    //cardId (string): 編集対象キャストのカードID
+    //void
+    //例 : editName('group1-staff-0') => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function editName(cardId) {
       const nameEl = document.getElementById(`${cardId}-name`);
-      
       const isPlaceholder = nameEl.innerHTML.includes('placeholder-text');
       const currentVal = isPlaceholder ? "" : nameEl.innerText;
 
@@ -451,7 +479,7 @@
       if (newVal !== null) {
         const trimmed = newVal.trim();
         if (trimmed === "") {
-          nameEl.innerHTML = `<span id="${cardId}-placeholder-text" class="text-slate-300 text-[10px] md:text-xs">キャスト名</span>`;
+          nameEl.innerHTML = `<span id="${cardId}-placeholder-text" class="text-slate-300 text-[10px] md:text-xs font-medium">キャスト名</span>`;
         } else {
           nameEl.innerText = trimmed;
         }
@@ -460,10 +488,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 画面の入力欄から最新データ状態をグローバル変数（currentBoardData）に同期する
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : syncDataFromDOM() => void
+    //画面の入力エレメント（役職・キャスト名・アバター）から最新データ状態を読み取って保持データ（currentBoardData）に反映させます。
+    //なし
+    //void
+    //例 : syncDataFromDOM() => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function syncDataFromDOM() {
       const groups = ['group1', 'group2', 'group3'];
@@ -498,20 +526,20 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // ファイル選択インプットをクリックさせるトリガー
-    // 引数：inputId (string) - ファイル入力タグのID
-    // 戻り値：なし
-    // 例 : triggerFileInput('group1-card-0-file') => void
+    //ファイルインプットエレメントの擬似的なクリック処理を発火させます。
+    //inputId (string): ターゲットとなるインプットタグのID
+    //void
+    //例 : triggerFileInput('file-input') => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function triggerFileInput(inputId) {
       document.getElementById(inputId).click();
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 画像ファイルを読み込みBase64としてアバターに設定する
-    // 引数：event (Event), imgId (string), placeholderId (string)
-    // 戻り値：なし
-    // 例 : handleImageUpload(event, 'group1-avatar-0', 'placeholder') => void
+    //画像ファイルをBase64テキストとして非同期展開し、キャスト画像（アバター）にバインドします。
+    //event (Event), imgId (string), placeholderId (string)
+    //void
+    //例 : handleImageUpload(event, 'avatar-img', 'placeholder') => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function handleImageUpload(event, imgId, placeholderId) {
       const file = event.target.files[0];
@@ -526,15 +554,16 @@
         imgElement.classList.remove('hidden');
         placeholderElement.classList.add('hidden');
         syncDataFromDOM();
+        adjustEqualHeights();
       };
       reader.readAsDataURL(file);
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // アップロードされた背景用画像をボード全体の背景に設定する
-    // 引数：event (Event)
-    // 戻り値：なし
-    // 例 : handleBgUpload(event) => void
+    //ポスター用の外部背景画像を読み込み、コラージュの背景CSSとしてバインドします。
+    //event (Event)
+    //void
+    //例 : handleBgUpload(event) => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function handleBgUpload(event) {
       const file = event.target.files[0];
@@ -551,10 +580,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // ボード本体に背景画像スタイルを適用・格納する
-    // 引数：base64Data (string) - 画像のBase64文字列
-    // 戻り値：なし
-    // 例 : applyBackgroundStyle('data:image...') => void
+    //ボード背景にBase64データをCSSのBackgroundImageとしてバインド・格納します。
+    //base64Data (string): Base64画像の文字列データ
+    //void
+    //例 : applyBackgroundStyle('data:image...') => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function applyBackgroundStyle(base64Data) {
       const target = document.getElementById('capture-area');
@@ -571,10 +600,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // トースト通知を一時的に表示する
-    // 引数：message (string) - 表示メッセージ内容
-    // 戻り値：なし
-    // 例 : showToast("保存しました") => void
+    //指定されたメッセージテキストのトースト通知を画面中央下にポップ表示させます。
+    //message (string): 表示文字列
+    //void
+    //例 : showToast("画像を保存しました") => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function showToast(message) {
       const toast = document.getElementById('toast');
@@ -590,10 +619,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // CSVファイルをアップロードした際のパース及び反映イベントハンドラ
-    // 引数：event (Event)
-    // 戻り値：なし
-    // 例 : handleCSVUpload(event) => void
+    //CSVインポート時のファイル読み込みイベントを処理します。
+    //event (Event)
+    //void
+    //例 : handleCSVUpload(event) => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function handleCSVUpload(event) {
       const file = event.target.files[0];
@@ -609,10 +638,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // CSVの文字列データを解析し、3つのグループに適切に分配して画面をリビルドする
-    // 引数：csvText (string) - CSVのテキスト全文
-    // 戻り値：なし
-    // 例 : parseAndApplyCSV(text) => void
+    //CSVデータのテキストを解析し、みずべ、猛獣、もふもふの担当キャスト、園長名に仕分けて描画状態をリビルドします。
+    //csvText (string): 生のCSVファイル内容
+    //void
+    //例 : parseAndApplyCSV(text) => undefined
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function parseAndApplyCSV(csvText) {
       const lines = csvText.split(/\r?\n/);
@@ -722,14 +751,14 @@
       }
 
       renderBoard(importedCasts);
-      showToast('CSVからキャスト情報・役割・アバターを自動反映しました！');
+      showToast('CSVからキャスト情報を自動反映しました！');
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // カンマ区切りのCSV一行分を、ダブルクォーテーションや改行を考慮して正しく配列に切り分ける
-    // 引数：text (string) - CSV一行のデータ
-    // 戻り値：Array (分割された文字列配列)
-    // 例 : parseCSVLine('"A,B",C') => ["A,B", "C"]
+    //ダブルクォーテーションのセル結合や改行に対応してCSVの1行を配列へ分割します。
+    //text (string): CSV形式の1行のテキスト
+    //Array (分割した列の配列)
+    //例 : parseCSVLine('"a,b",c') => ["a,b", "c"]
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function parseCSVLine(text) {
       const result = [];
@@ -760,10 +789,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 現在のボードのデータ一式を取得する
-    // 引数：なし
-    // 戻り値：Object (現在のボード全データ)
-    // 例 : captureCurrentData() => { date: "...", ... }
+    //現在のボードのデータ一式を取得します。
+    //なし
+    //Object (現在のボード全データ)
+    //例 : captureCurrentData() => { date: "...", ... }
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function captureCurrentData() {
       syncDataFromDOM();
@@ -783,10 +812,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 編集中の内容をローカルストレージへ即時保存する
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : saveTemplate() => void
+    //編集中の内容をローカルストレージへ即時保存します。
+    //なし
+    //void
+    //例 : saveTemplate() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function saveTemplate() {
       const data = captureCurrentData();
@@ -795,10 +824,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // ローカルストレージに保存されたデータを読み込み適用する
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : loadBoardState() => void
+    //ローカルストレージに保存されたデータを読み込み適用します。
+    //なし
+    //void
+    //例 : loadBoardState() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function loadBoardState() {
       const saved = localStorage.getItem('cast_board_template');
@@ -836,10 +865,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // リセット確認モーダルを開く
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : openConfirmModal() => void
+    //リセット確認モーダルを開きます。
+    //なし
+    //void
+    //例 : openConfirmModal() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function openConfirmModal() {
       const modal = document.getElementById('confirm-modal');
@@ -853,10 +882,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // リセット確認モーダルを閉じる
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : closeConfirmModal() => void
+    //リセット確認モーダルを閉じます。
+    //なし
+    //void
+    //例 : closeConfirmModal() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function closeConfirmModal() {
       const modal = document.getElementById('confirm-modal');
@@ -870,10 +899,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // 実際に初期データへリセット処理を実行する
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : executeReset() => void
+    //実際に初期データへリセット処理を実行します。
+    //なし
+    //void
+    //例 : executeReset() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function executeReset() {
       localStorage.removeItem('cast_board_template');
@@ -892,10 +921,10 @@
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    // html2canvasを用いてボードを画像データ(PNG)として書き出し、自動保存する
-    // 引数：なし
-    // 戻り値：なし
-    // 例 : exportAsImage() => void
+    //html2canvasを用いてボードを画像データ(PNG)として書き出し、自動保存します。
+    //なし
+    //void
+    //例 : exportAsImage() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function exportAsImage() {
       syncDataFromDOM();
@@ -924,8 +953,20 @@
         try {
           const imgData = canvas.toDataURL('image/png');
           const link = document.createElement('a');
-          const dateText = document.getElementById('date-text').innerText.trim() || 'cast_board';
-          link.download = `${dateText}.png`;
+          const castName = document.getElementById('sender-name').innerText.trim() || 'unknown';
+		const rawDate = document.getElementById('date-text').innerText.trim();
+
+		// 1. 正規表現で "数字/数字" のパターンを抽出（例: "6/12"）
+		const dateMatch = rawDate.match(/(\d+)\/(\d+)/);
+
+		let dateCode = '0000';
+		if (dateMatch) {
+		  // 2. 抽出した月・日をそれぞれ2桁（0埋め）に変換
+		  const mm = dateMatch[1].padStart(2, '0');
+		  const dd = dateMatch[2].padStart(2, '0');
+		  dateCode = `${mm}${dd}`;
+}
+	link.download = `出演キャスト_${dateCode}.png`;
           link.href = imgData;
           link.click();
           showToast('画像をダウンロードしました！');
