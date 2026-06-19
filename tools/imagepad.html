@@ -81,7 +81,7 @@
             <i class="fa-solid fa-file-csv"></i> CSVファイルを読み込む
           </h2>
           <p class="text-xs text-stone-600 mb-4 leading-relaxed">
-            スプレッドシートの「次回出演者」からエクスポートした名簿CSVファイルを指定してください。自動的に「担当エリア」や「キャラシートURL」項目を解析し、3エリア（もふ、猛獣、みずべ）のケモノ＆飼育員キャストを仕分けして画像を組み合わせ、プレビューを作成します。
+            スプレッドシートの「次回出演者」からエクスポートした名簿CSVファイルを指定してください。自動的に「担当エリア」や「キャラカードURL」項目を解析し、3エリア（もふ、猛獣、みずべ）のケモノ＆飼育員キャストを仕分けして画像を組み合わせ、プレビューを作成します。
           </p>
           
           <div class="flex flex-col gap-3">
@@ -677,7 +677,7 @@
 
       let headerRowIdx = -1;
       for (let i = 0; i < rows.length; i++) {
-        if (rows[i].includes("担当") || rows[i].includes("キャラシートURL")) {
+        if (rows[i].includes("担当") || rows[i].includes("キャラカードURL")) {
           headerRowIdx = i;
           break;
         }
@@ -687,7 +687,7 @@
 
       const headers = rows[headerRowIdx] || [];
       const roleColIdx = headers.findIndex(h => h.includes("担当") || h.includes("役職"));
-      const urlColIdx = headers.findIndex(h => h.includes("キャラシートURL") || h.includes("URL"));
+      const urlColIdx = headers.findIndex(h => h.includes("キャラカードURL") || h.includes("URL"));
       const nameColIdx = headers.findIndex(h => h.includes("キャスト愛称") || h.includes("VRC表示名") || h.includes("名前"));
 
       const defaultRoleIdx = roleColIdx !== -1 ? roleColIdx : 0;
