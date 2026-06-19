@@ -687,7 +687,7 @@
 
       const headers = rows[headerRowIdx] || [];
       const roleColIdx = headers.findIndex(h => h.includes("担当") || h.includes("役職"));
-      const urlColIdx = headers.findIndex(h => h.includes("キャラシートURL") || h.includes("URL"));
+      const urlColIdx = headers.findIndex(h => h.includes("キャラシートURL") || h.includes("キャラシート"));
       const nameColIdx = headers.findIndex(h => h.includes("キャスト愛称") || h.includes("VRC表示名") || h.includes("名前"));
 
       const defaultRoleIdx = roleColIdx !== -1 ? roleColIdx : 0;
