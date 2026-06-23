@@ -927,16 +927,17 @@ function parseAndApplyCSV(csvText) {
     }
 
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
-    //html2canvasを用いてボードを画像データ(PNG)として書き出し、自動保存します。
-    //なし
-    //void
+    //関の説明 : html2canvasを用いてボードを画像データ(PNG)として書き出し、自動保存します。
+    //引数に入れるべきもの : なし
+    //戻り値はどんなものか : void
     //例 : exportAsImage() => void
     //＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー＝ー
     function exportAsImage() {
       syncDataFromDOM();
       showToast('画像を生成中...');
       
-      const actionButtons = document.querySelectorAll('.action-btn');
+      // 修正：ボタンだけでなく、ペンアイコン(lucide-pencil)も含めて一時的に非表示にする
+      const actionButtons = document.querySelectorAll('.action-btn, [data-lucide="pencil"]');
       actionButtons.forEach(btn => btn.style.display = 'none');
 
       const selection = window.getSelection();
@@ -954,6 +955,7 @@ function parseAndApplyCSV(csvText) {
       };
 
       html2canvas(target, options).then(canvas => {
+        // 修正：非表示にした要素をすべて再表示する
         actionButtons.forEach(btn => btn.style.display = '');
 
         try {
